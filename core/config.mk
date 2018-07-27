@@ -778,7 +778,7 @@ endif
     PRODUCT_COMPATIBLE_PROPERTY
 
 #OrangeFox post script
-FOX_VENDOR:=vendor/fox/OrangeFox.sh
+FOX_VENDOR:=vendor/recovery/OrangeFox.sh
 
 # Boolean variable determining if Treble is fully enabled
 PRODUCT_FULL_TREBLE := false
