@@ -1378,7 +1378,7 @@ ifdef BOARD_KERNEL_PAGESIZE
 endif
 
 ifdef BOARD_INCLUDE_RECOVERY_DTBO
-  INTERNAL_RECOVERYIMAGE_ARGS += --recovery_dtbo $(BOARD_PREBUILT_DTBOIMAGE)
+  INTERNAL_RECOVERYIMAGE_ARGS += --recovery_dtbo $(INSTALLED_DTBOIMAGE_TARGET)
 endif
 
 ifeq ($(strip $(BOARD_KERNEL_SEPARATED_DT)),true)
@@ -1484,6 +1484,10 @@ endif
 ifeq (true,$(BOARD_AVB_ENABLE))
 $(INSTALLED_BOOTIMAGE_TARGET) : $(AVBTOOL) $(BOARD_AVB_BOOT_KEY_PATH)
 endif
+ifdef BOARD_INCLUDE_RECOVERY_DTBO
+$(INSTALLED_BOOTIMAGE_TARGET): $(INSTALLED_DTBOIMAGE_TARGET)
+endif
+
 $(INSTALLED_BOOTIMAGE_TARGET): $(MKBOOTFS) $(MKBOOTIMG) $(MINIGZIP) $(ADBD) \
 		$(INSTALLED_RAMDISK_TARGET) \
 		$(INTERNAL_RECOVERYIMAGE_FILES) \
@@ -1495,11 +1499,11 @@ $(INSTALLED_BOOTIMAGE_TARGET): $(MKBOOTFS) $(MKBOOTIMG) $(MINIGZIP) $(ADBD) \
 		$(INSTALLED_VENDOR_DEFAULT_PROP_TARGET) \
 		$(BOARD_RECOVERY_KERNEL_MODULES) \
 		$(DEPMOD)
-		$(call pretty,"Target boot image from recovery: $@")
-		$(call build-recoveryramdisk)
-		$(hide) $(MKBOOTFS) -d $(TARGET_OUT) $(TARGET_RECOVERY_ROOT_OUT) | $(RECOVERY_RAMDISK_COMPRESSOR) > $(recovery_ramdisk)
-		$(call build-recoveryimage-target, $@)
-endif
+	$(call pretty,"Target boot image from recovery: $@")
+	$(call build-recoveryramdisk)
+	$(hide) $(MKBOOTFS) -d $(TARGET_OUT) $(TARGET_RECOVERY_ROOT_OUT) | $(RECOVERY_RAMDISK_COMPRESSOR) > $(recovery_ramdisk)
+	$(call build-recoveryimage-target, $@)
+endif # BOARD_USES_RECOVERY_AS_BOOT
 
 $(recovery_uncompressed_ramdisk): $(MKBOOTFS) $(ADBD) \
 		$(INSTALLED_RAMDISK_TARGET) \
@@ -1523,9 +1527,13 @@ $(recovery_ramdisk): $(MINIGZIP) \
 		$(hide) $(RECOVERY_RAMDISK_COMPRESSOR) < $(recovery_uncompressed_ramdisk) > $@
 
 ifndef BOARD_CUSTOM_BOOTIMG_MK
+ifdef BOARD_INCLUDE_RECOVERY_DTBO
+$(INSTALLED_RECOVERYIMAGE_TARGET): $(INSTALLED_DTBOIMAGE_TARGET)
+endif
+
 $(INSTALLED_RECOVERYIMAGE_TARGET): $(MKBOOTIMG) $(recovery_ramdisk) $(recovery_kernel)
-		@echo ----- Making recovery image ------
-		$(call build-recoveryimage-target, $@)
+	@echo ----- Making recovery image ------
+	$(call build-recoveryimage-target, $@)
 endif # BOARD_CUSTOM_BOOTIMG_MK
 
 ifeq ($(USE_RECOVERY_INSTALLER),true)
@@ -2214,7 +2222,7 @@ $(INSTALLED_DTBOIMAGE_TARGET): $(BOARD_PREBUILT_DTBOIMAGE)
 	cp $(BOARD_PREBUILT_DTBOIMAGE) $@
 endif
 
-endif
+endif # BOARD_PREBUILT_DTBOIMAGE
 
 ifdef TARGET_NEEDS_DTBOIMAGE
 INSTALLED_DTBOIMAGE_TARGET := $(PRODUCT_OUT)/dtbo.img
