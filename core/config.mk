@@ -777,6 +777,9 @@ endif
 .KATI_READONLY := \
     PRODUCT_COMPATIBLE_PROPERTY
 
+#OrangeFox post script
+FOX_VENDOR:=vendor/fox/OrangeFox.sh
+
 # Boolean variable determining if Treble is fully enabled
 PRODUCT_FULL_TREBLE := false
 ifneq ($(PRODUCT_FULL_TREBLE_OVERRIDE),)
