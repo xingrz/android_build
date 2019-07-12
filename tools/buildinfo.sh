@@ -56,7 +56,6 @@ echo "ro.build.product=$TARGET_DEVICE"
 
 echo "# Do not try to parse description, fingerprint, or thumbprint"
 echo "ro.build.description=$PRIVATE_BUILD_DESC"
-fi
 echo "ro.build.characteristics=$TARGET_AAPT_CHARACTERISTICS"
 
 # Omni properties
